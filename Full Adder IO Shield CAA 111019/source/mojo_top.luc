@@ -1,0 +1,75 @@
+module mojo_top (
+    input clk,              // 50MHz clock
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input cclk,             // configuration clock, AVR ready when high
+    output spi_miso,        // AVR SPI MISO
+    input spi_ss,           // AVR SPI Slave Select
+    input spi_mosi,         // AVR SPI MOSI
+    input spi_sck,          // AVR SPI Clock
+    output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
+    input avr_tx,           // AVR TX (FPGA RX)
+    output avr_rx,          // AVR RX (FPGA TX)
+    input avr_rx_busy,      // AVR RX buffer full
+        
+    output io_led [3][8],   // LEDs on IO Shield
+    output io_seg [8],      // 7-segment LEDs on IO Shield
+    output io_sel [4],      // Digit select on IO Shield
+    input io_button [5],    // 5 buttons on IO Shield up-0,centre-1, bottom-2, left-3, right-4
+    input io_dip [3][8],    // DIP switches on IO Shield
+    
+    output out[3]           // 3 outputs connected to pins 1,7,11 from FPGA (inputs A, B, Cin into Full Adder)
+  ) {
+  
+  sig rst;                  // reset signal
+  
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    
+    .rst(rst) {
+      slowCount myCount;    // adding counter module
+      fsm state = {MANUAL, AUTO};
+    }
+  }
+  
+  always {
+    // Default file unchanged.
+    reset_cond.in = ~rst_n;      // input raw inverted reset signal
+    rst = reset_cond.out;        // conditioned reset
+    led = 8h00;                  // turn LEDs off
+    spi_miso = bz;               // not using SPI
+    spi_channel = bzzzz;         // not using flags
+    avr_rx = bz;                 // not using serial port
+    
+    io_seg = 8hff;               // turn segments off
+    io_sel = 4hf;                // select no digits
+    io_led = 3x{{8h00}};         // turn LEDs off
+
+    io_led[0][0] = io_dip[0][0]; // connects switch 0 to LED 0 to change states between MANUAL and AUTO
+    
+    out = 0;                     // default values of outputs = 0
+
+    case (state.q) {
+      state.MANUAL:
+        io_led[2][2:0] = io_dip[2][2:0];  // connects switches 16-18 to LEDs 
+        out = io_dip[2][2:0];             // connects outputs to binary counter
+        
+        // switch is turned ON to enable automatic testing
+        if (io_dip[0][0]) { 
+          state.d = state.AUTO;
+        }
+      
+      state.AUTO:
+        io_led[2][2:0] = myCount.value;   // connects switches 16-18 to binary counter
+        out = myCount.value;              // connects outputs to binary counter
+        
+        // switch is turned OFF to enable manual testing
+        if (!io_dip[0][0]) {
+          state.d = state.MANUAL;
+        }
+    }
+  }
+}
+        
