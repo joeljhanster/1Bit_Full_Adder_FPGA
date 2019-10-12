@@ -1,0 +1,20 @@
+module multi_dec_ctr #(
+    DIGITS = 3 : DIGITS >= 2
+  ) (
+    input clk,
+    input rst,
+    input inc,
+    output digits[DIGITS][3]
+  ) {
+  
+  .clk(clk), .rst(rst) {
+    decimal_counter dctr [DIGITS];
+  }
+
+  always {
+    dctr.inc[0] = inc;
+    digits = dctr.value;
+    
+    dctr.inc[1+:DIGITS-1] = dctr.ovf[0+:DIGITS-1];
+  }
+}

@@ -1,0 +1,25 @@
+module decimal_counter (
+    input clk,  // clock
+    input rst,  // reset
+    input inc,  // increment the counter
+    output ovf,  // counter overflowed
+    output value[3]  // current value
+  ) {
+  
+  .clk(clk), .rst(rst) {
+    dff val[24];  // value storage
+  }
+
+  always {
+    value = val.q;    // output the value
+    
+    ovf = val.q == 1 && inc;
+    
+    if (inc) {
+      if (val.q == 1)
+        val.d = 0;
+      else
+        val.d = val.q + 1;
+    }
+  }
+}
