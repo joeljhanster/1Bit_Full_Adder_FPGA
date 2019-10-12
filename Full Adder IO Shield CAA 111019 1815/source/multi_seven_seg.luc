@@ -2,11 +2,11 @@ module multi_seven_seg #(
     DIGITS = 3 : DIGITS > 0,
     DIV = 16 : DIV >= 0
   )(
-    input clk,                // clock
-    input rst,                // reset
-    input values [DIGITS][3], // values to show
-    output seg [7],           // LED segments
-    output sel [DIGITS]       // Digit select
+    input clk,                           // clock
+    input rst,                           // reset
+    input values [DIGITS][3],            // values to show
+    output seg [7],                      // LED segments
+    output sel [DIGITS]                  // Digit select
   ) {
   
   // number of bits required to store DIGITS-1

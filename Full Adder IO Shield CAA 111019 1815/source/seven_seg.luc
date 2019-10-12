@@ -1,6 +1,4 @@
-// This file is modified to allow the 7-segment LED panel to display 5 more characters, F, A, I, L, P.
-// This is used to display the words 'FAIL' and 'PASS' on the 7-segment LED panel
-// ''5' is used as 'S' character.
+// This file is modified to allow the 7-segment LED panel to display 0 or 1
 
 module seven_seg (
     input char[4],
@@ -9,19 +7,18 @@ module seven_seg (
 
   always {
     case (char) {
-      0: segs = 7b0111111;
-      1: segs = 7b0000110;
-      2: segs = 7b1011011;
-      3: segs = 7b1001111;
-      4: segs = 7b1100110;
-      5: segs = 7b1101101;
-      6: segs = 7b1111101;
-      7: segs = 7b0000111;
-      8: segs = 7b1111111;
-      9: segs = 7b1100111;
-      10: segs = 7b0000000; // empty seg
-
-      default: segs = 7b0000000;
+      // Segment is ON when "1" and OFF when "0"
+      0: segs = 7b0111111;        // displays 0
+      1: segs = 7b0000110;        // displays 1
+      2: segs = 7b1011011;        // displays 2
+      3: segs = 7b1001111;        // displays 3
+      4: segs = 7b1100110;        // displays 4
+      5: segs = 7b1101101;        // displays 5
+      6: segs = 7b1111101;        // displays 6
+      7: segs = 7b0000111;        // displays 7
+      8: segs = 7b1111111;        // displays 8
+      9: segs = 7b1100111;        // displays 9
+      default: segs = 7b0000000;  // no display
     }
   }
 }

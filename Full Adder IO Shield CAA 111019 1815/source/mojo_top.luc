@@ -16,7 +16,7 @@ module mojo_top (
     output io_seg [8],      // 7-segment LEDs on IO Shield
     output io_sel [4],      // Digit select on IO Shield
     input io_button [5],    // 5 buttons on IO Shield up-0,centre-1, bottom-2, left-3, right-4
-    input io_dip [3][8]    // DIP switches on IO Shield
+    input io_dip [3][8]     // DIP switches on IO Shield
   ) {
   
   sig rst;                  // reset signal
@@ -29,39 +29,33 @@ module mojo_top (
     edge_detector edge_detector (#RISE(1), #FALL(0));
     
     .rst(rst) {
-      multi_seven_seg seg;
-      multi_dec_ctr dec_ctr;
-      slowCount myCount;    // adding counter module
-      counter ctr (#SIZE(1), #DIV(24));
-      fsm state = {MANUAL, AUTO};
+      multi_seven_seg seg;                // adding seven segment module
+      multi_dec_ctr dec_ctr;              // adding decimal counter module
+      slowCount myCount;                  // adding slow counter module
+      counter ctr (#SIZE(1), #DIV(24));   // adding counter module
+      fsm state = {MANUAL, AUTO};         // defining finite state machines (FSMs)
     }
   }
   
   always {
     // Default file unchanged.
-    reset_cond.in = ~rst_n;      // input raw inverted reset signal
-    rst = reset_cond.out;        // conditioned reset
-    led = 8h00;                  // turn LEDs off
-    spi_miso = bz;               // not using SPI
-    spi_channel = bzzzz;         // not using flags
-    avr_rx = bz;                 // not using serial port
+    reset_cond.in = ~rst_n;               // input raw inverted reset signal
+    rst = reset_cond.out;                 // conditioned reset
+    led = 8h00;                           // turn LEDs off
+    spi_miso = bz;                        // not using SPI
+    spi_channel = bzzzz;                  // not using flags
+    avr_rx = bz;                          // not using serial port
     
     edge_detector.in = ctr.value;
     dec_ctr.inc = edge_detector.out;
     
-    // the segments will display "0000" by default
-    seg.values = {3h0, 3h0, 3h0};
+    seg.values = {3h0, 3h0, 3h0};         // the segments will display "000" by default
     
-    io_seg = ~seg.seg; // connect segments to the driver
-    io_sel = ~seg.sel; // connect digit select to the driver
-    
-    //io_seg = 8hff;               // turn segments off
-    //io_sel = 4hf;                // select no digits
-    io_led = 3x{{8h00}};         // turn LEDs off
+    io_seg = ~seg.seg;                    // connect segments to the driver
+    io_sel = ~seg.sel;                    // connect digit select to the driver
+    io_led = 3x{{8h00}};                  // turn LEDs off
 
-    io_led[0][0] = io_dip[0][0]; // connects switch 0 to LED 0 to change states between MANUAL and AUTO
-    
-    // out = 0;                     // default values of outputs = 0
+    io_led[0][0] = io_dip[0][0];          // connects switch 0 to LED 0 to change states between MANUAL and AUTO
 
     case (state.q) {
       state.MANUAL:
@@ -72,31 +66,31 @@ module mojo_top (
           state.d = state.AUTO;
         }
         
-        //TEST CASE 1: 000
+        // TEST CASE 1: 000
         if (!io_dip[2][2] & !io_dip[2][1] & !io_dip[2][0]) {
           seg.values = {3h0, 3h0, 3h0};
         }
-        //TEST CASE 2: 001
+        // TEST CASE 2: 001
         if (!io_dip[2][2] & !io_dip[2][1] & io_dip[2][0]) {
           seg.values = {3h0, 3h0, 3h1};
         }
-        //TEST CASE 3: 010
+        // TEST CASE 3: 010
         if (!io_dip[2][2] & io_dip[2][1] & !io_dip[2][0]) {
           seg.values = {3h0, 3h1, 3h0};
         }
-        //TEST CASE 4: 011
+        // TEST CASE 4: 011
         if (!io_dip[2][2] & io_dip[2][1] & io_dip[2][0]) {
           seg.values = {3h0, 3h1, 3h1};
         }
-        //TESTCASE 5: 100
+        // TEST CASE 5: 100
         if (io_dip[2][2] & !io_dip[2][1] & !io_dip[2][0]) {
           seg.values = {3h1, 3h0, 3h0};
         }
-        //TEST CASE 6: 101
+        // TEST CASE 6: 101
         if (io_dip[2][2] & !io_dip[2][1] & io_dip[2][0]) {
           seg.values = {3h1, 3h0, 3h1};
         }
-        //TEST CASE 7: 110
+        // TEST CASE 7: 110
         if (io_dip[2][2] & io_dip[2][1] & !io_dip[2][0]) {
           seg.values = {3h1, 3h1, 3h0};
         }
@@ -106,11 +100,8 @@ module mojo_top (
         }
       
       state.AUTO:
-        io_led[2][2:0] = myCount.value;
-        // io_led[2][2:0] = myCount.value;   // connects switches 16-18 to binary counter
-        // out = myCount.value;              // connects outputs to binary counter
-        
-        seg.values = dec_ctr.digits;
+        io_led[2][2:0] = myCount.value;   // connects switches 16-18 to binary counter
+        seg.values = dec_ctr.digits;      // seven segment to automatically change
         
         // switch is turned OFF to enable manual testing
         if (!io_dip[0][0]) {
