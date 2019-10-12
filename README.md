@@ -5,9 +5,16 @@ The Mini Hardware Project is a 50.002 Computational Structures project that invo
 ### Finite State Machines (FSMs)
 There will be two states:
 
-* State 1: MANUAL
++ State 1: MANUAL
 + State 2: AUTO
 
 The change in states is determined based on Switch 0 denoted by `io_dip[0][0]`.
 If Switch 0 is turned off, the FPGA will be in the MANUAL state.
 If Switch 0 is turned on, the FPGA will be in the AUTO state.
+
+#### Done By:
++ Lim Jie Han, Joel
++ Jeremy Ng Kah Jun
++ Tay Kiat Hong
++ Teo Siang Chuan Daniel
++ Suhas Sahu
